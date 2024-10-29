@@ -1,6 +1,7 @@
 import random
 
-from stateMachine import StateMachine, space_down, time_out, right_down, left_down, left_up, right_up, start_event
+from stateMachine import StateMachine, space_down, time_out, right_down, left_down, left_up, right_up, start_event, \
+    a_down
 
 from pico2d import load_image, get_time
 
@@ -8,7 +9,7 @@ from pico2d import load_image, get_time
 class Idle:
     @staticmethod
     def enter(boy,e):
-        if left_up(e) or right_down(e):
+        if left_up(e) or right_down(e) or time_out(e) or a_down(e):
             boy.action = 2
             boy.face_dir = -1
         elif right_up(e) or left_down(e) or start_event(e):
@@ -28,7 +29,7 @@ class Idle:
     @staticmethod
     def do(boy):
         boy.frame = (boy.frame + 1) % 8
-        if get_time() - boy.start_time > 3:
+        if get_time() - boy.start_time > 5:
             boy.state_machine.add_event(('TIME_OUT', 0))
 
     @staticmethod
@@ -95,7 +96,12 @@ class Run:
 class AutoRun:
     @staticmethod
     def enter(boy, e):
-       pass
+        if boy.face_dir == 1:
+            boy.dir, boy.action = 1, 1
+        elif boy.face_dir == -1:
+            boy.dir, boy.action = -1, 0
+        boy.start_time = get_time()
+        pass
 
     @staticmethod
     def exit(boy, e):
@@ -103,10 +109,23 @@ class AutoRun:
 
     @staticmethod
     def do(boy):
+        boy.x += boy.dir * 10
+        if boy.x<=0:
+            boy.dir, boy.action = 1, 1
+        elif  boy.x>=800:
+            boy.dir, boy.action = -1, 0
+        boy.frame = (boy.frame + 1) % 8
+        if get_time() - boy.start_time > 5:
+            boy.state_machine.add_event(('TIME_OUT', 0))
         pass
 
     @staticmethod
     def draw(boy):
+        boy.image.clip_draw(
+            boy.frame * 100, boy.action * 100, 100, 100,
+            boy.x, boy.y+15,
+            150, 150 # 확대
+        )
         pass
 
 class Boy:
@@ -121,9 +140,10 @@ class Boy:
         self.state_machine.start(Idle) # 초기 상태가 idle 로 설정
         self.state_machine.set_transitions(
             { # dict 를 통해 표현
-                Idle : {right_down: Run, left_down:Run, left_up:Run, right_up:Run, time_out : Sleep},
+                Idle : {right_down: Run, left_down:Run, left_up:Run, right_up:Run, time_out : Sleep, a_down: AutoRun},
                 Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle},
-                Sleep: {right_down: Run, left_down: Run, right_up: Run, left_up: Run, space_down: Idle}
+                Sleep: {right_down: Run, left_down: Run, right_up: Run, left_up: Run, space_down: Idle},
+                AutoRun: {right_down: Run, left_down:Run, left_up:Run, right_up:Run, time_out : Idle}
             }
         )
 

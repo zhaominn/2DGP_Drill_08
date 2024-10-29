@@ -1,7 +1,7 @@
  # 이벤트 체크함수를 정의
  # 상태 이벤트 e =  (종류,실제 값) 튜플로 정의
 
-from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDLK_LEFT, SDL_KEYUP
+from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDLK_LEFT, SDL_KEYUP, SDLK_a
 
 def start_event(e):
     return e[0] =='START'
@@ -24,6 +24,8 @@ def left_down(e):
 def left_up(e):
     return e[0] =='INPUT' and e[1].type == SDL_KEYUP and e[1].key==SDLK_LEFT
 
+def a_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
 
 class StateMachine:
     def __init__(self, obj):
