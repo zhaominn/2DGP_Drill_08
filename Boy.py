@@ -92,6 +92,23 @@ class Run:
             boy.x, boy.y
         )
 
+class AutoRun:
+    @staticmethod
+    def enter(boy, e):
+       pass
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        pass
+
+    @staticmethod
+    def draw(boy):
+        pass
+
 class Boy:
     image = None
     def __init__(self):
